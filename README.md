@@ -16,7 +16,7 @@
 >>> `contract <ChildContractName> is <ParentContractName> { ... }`
 >>>> ![alt text](Inheritance.png)
 
-## 4. Interfaces in Solidity
+## 4. Interfaces in Solidity and a Fund & Withdraw app
 >**Chainlink provides decentralised API support in solidity**
 > *Interfaces are declared using "interface" keyword instead of "contract" keyword*
 >> *Interface provide minimalistic view of a contract*
@@ -56,5 +56,49 @@
         uint256 ethAmountInUSD=(ethPrice*ethAmount)/1000000000000000000;
         return ethAmountInUSD;
     }
->> ![alt text](InterfaceDemoETHtoUSD.png)
+>
+>  **Setting the threshold Amount**
+>> *Now that we have our conversion and fund acceptor set-up, now we can check if the fund is equal to or above the threshold value using the **"require"** function*
 
+    function fund() public payable{
+        //$50
+        uint256 minimumUSD=50*10**18;//Wei terms
+        require(getConversionRate(msg.value)>=minimumUSD,"You need to spend more ETH!");
+    }
+>>*Now whenever the amount is less than our minimumUSD then the transaction will fail with an error "You need to spend more ETH"*
+>
+>**Now Lets make a withdraw function so that user can withdraw the amount that they've funded**\
+>**Also we need a modifier so that we can check if the msg.sender is the owner itself.... for security reasons**
+>**We will need a constructor to set the owner as soon as the contract is initialised**
+
+    address public owner;
+    
+    constructor() public{
+        owner=msg.sender;
+    }
+    
+    modifier onlyOwner{
+        require(msg.sender==owner);
+        _;
+    }
+    
+    function withdraw() payable onlyOwner public{
+        //Only want the contract admin/owner
+        //require msg.sender=owner
+        msg.sender.transfer(address(this).balance);
+    }
+>**After withdraw we need to reset the funder amount**
+
+    address[] public funders;
+    //in fund function after adding to mapping
+    funders.push(msg.sender);
+    
+    //in the withdraw function after transferring amount to sender
+    
+    for(uint256 funderindex=0;funderindex<funders.length;funderindex++){
+            address funder=funders[funderindex];
+            addressToAmountFunded[funder]=0;
+    }
+    funders=new address[](0);
+>>![alt text](fundingApp.png)
+     
