@@ -101,4 +101,61 @@
     }
     funders=new address[](0);
 >>![alt text](fundingApp.png)
-     
+
+## 5. Working in VSCODE, Python, Solidity, Web3, Ganache....
+>**Opening .sol file in python script**
+
+    with open("./SimpleStorage.sol", "r") as file:
+        simple_storage_file = file.read()
+        print(simple_storage_file)
+
+>**Install py-solc-x -> Solidity Compiler**
+    
+    pip install py-solc-x
+>**Use solcx in your project**
+
+    from solcx import compile_standard, install_solc
+    install_solc("0.6.0")
+>**Compile and store the compiled file in a variable**
+
+    compiled_sol = compile_standard(
+        {
+            "language": "Solidity",
+            "sources": {"SimpleStorage.sol": {"content": simple_storage_file}},
+            "settings": {
+                "outputSelection": {
+                    "*": {"*": ["abi", "metadata", "evm.bytecode", "evm.sourceMap"]}
+                }
+            },
+        },
+        solc_version="0.6.0",
+    )
+ 
+>**Get the bytecode and ABI from the compiled code**
+
+    #get bytcode
+    bytecode= compiled_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["evm"]["bytecode"]["object"]
+
+    #get abi
+    abi=compiled_sol["contracts"]["SimpleStorage.sol"]["SimpleStorage"]["abi"]
+
+>**To deploy to local virtual machine we need a local blockchain -> Ganache**
+>**install ganache from their website**
+>**Now we need Web3.py**
+
+    pip install web3
+>**Import web3 in python script**
+
+    from web3 import Web3
+>**Grab an address of a blockchain from Ganache and its private key and store them here**
+
+    #for connecting to ganache
+    w3=Web3(Web3.HTTPProvider("http://0.0.0.0:8545"))
+    chain_id=1337
+    my_address="0x846CbacAe5508216708edcFb9E3ebBF9Bb0F87F3"
+    private_key="0x8548f28e1c76bca843d3d95a259597079a78f65e1402c2dcb0edbb3f788472a2"
+>**Now create the contract in python**
+
+    #Create the contract in python
+    SimpleStorage=w3.eth.contract(abi=abi,bytecode=bytecode)
+
