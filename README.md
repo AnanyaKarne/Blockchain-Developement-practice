@@ -144,13 +144,15 @@
 >**Now we need Web3.py**
 
     pip install web3
+    
+ *If It gives some error then download microsoft visual studio build tools*
 >**Import web3 in python script**
 
     from web3 import Web3
->**Grab an address of a blockchain from Ganache and its private key and store them here**
+>**Grab an address of a blockchain from Ganache and its private key, and store them here**
 
     #for connecting to ganache
-    w3=Web3(Web3.HTTPProvider("http://0.0.0.0:8545"))
+    w3=Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
     chain_id=1337
     my_address="0x846CbacAe5508216708edcFb9E3ebBF9Bb0F87F3"
     private_key="0x8548f28e1c76bca843d3d95a259597079a78f65e1402c2dcb0edbb3f788472a2"
@@ -158,4 +160,21 @@
 
     #Create the contract in python
     SimpleStorage=w3.eth.contract(abi=abi,bytecode=bytecode)
+>**Now get the number of transactions till now**
+   
+    #Get the latest transaction
+    nonce=w3.eth.getTransactionCount(my_address)
+> **Now we have to**
+>
+>>**Build the Transaction**
+    
+    transaction=SimpleStorage.constructor().buildTransaction({"gasPrice":w3.eth.gas_price,"chainId":chain_id,"from": my_address, "nonce":nonce})
+>
+>> **Sign the transaction**
+
+    signed_txn=w3.eth.account.sign_transaction(transaction,private_key=private_key)
+>
+>> **Send the transaction**
+    
+    tx_hash=w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 
